@@ -1,0 +1,33 @@
+{
+  "name": "swasthyasathi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SwasthyaSathi - Health Companion App for Nepal",
+  "workspaces": [
+    "mobile",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "mobile": "yarn workspace @swasthyasathi/mobile start",
+    "mobile:ios": "yarn workspace @swasthyasathi/mobile ios",
+    "mobile:android": "yarn workspace @swasthyasathi/mobile android",
+    "backend": "yarn workspace @swasthyasathi/backend dev",
+    "backend:build": "yarn workspace @swasthyasathi/backend build",
+    "backend:start": "yarn workspace @swasthyasathi/backend start",
+    "shared:build": "yarn workspace @swasthyasathi/shared build",
+    "typecheck": "yarn workspaces run typecheck",
+    "lint": "yarn workspaces run lint",
+    "clean": "yarn workspaces run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": ">=1.22.0"
+  }
+}
