@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.yarn/
 .pnp
 .pnp.js
 
@@ -52,6 +53,12 @@ mobile/metro.config.js.bak
 # Backend specific
 backend/uploads/
 backend/.env
+
+# API Keys & Credentials (IMPORTANT!)
+**/credentials.json
+**/*.pem
+**/*.key
+**/service-account*.json
 
 # Database
 *.db
