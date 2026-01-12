@@ -12,6 +12,9 @@ import RecordsTab from './screens/RecordsTab';
 import ScannerTab from './screens/ScannerTab';
 import ProfileTab from './screens/ProfileTab';
 
+// Import detail screens
+import DocumentDetailScreen from './screens/DocumentDetailScreen';
+
 // Import auth screens
 import LoginScreen from './screens/auth/LoginScreen';
 import RegisterScreen from './screens/auth/RegisterScreen';
@@ -21,6 +24,42 @@ import apiService from './services/api.service';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+// Records Stack Navigator (to enable navigation to DocumentDetail)
+const RecordsStack: React.FC = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#007AFF',
+        },
+        headerTintColor: '#FFFFFF',
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: 18,
+        },
+        headerTitleAlign: 'center',
+      }}
+    >
+      <Stack.Screen
+        name="RecordsList"
+        component={RecordsTab}
+        options={{
+          headerTitle: 'SwasthyaSathi',
+          headerShown: false, // We'll use the tab bar header instead
+        }}
+      />
+      <Stack.Screen
+        name="DocumentDetail"
+        component={DocumentDetailScreen}
+        options={{
+          headerTitle: 'Document',
+          headerShown: true,
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 const MainTabs: React.FC = () => {
   return (
@@ -84,7 +123,7 @@ const MainTabs: React.FC = () => {
       />
       <Tab.Screen
         name="Records"
-        component={RecordsTab}
+        component={RecordsStack}
         options={{
           headerTitle: 'SwasthyaSathi',
           tabBarLabel: 'Records',

@@ -142,6 +142,17 @@ class ApiService {
     return response.data.data!;
   }
 
+  async updateDocument(
+    documentId: string,
+    data: { title?: string; description?: string; notes?: string; type?: string }
+  ): Promise<Document> {
+    const response = await this.client.put<ApiResponse<Document>>(
+      `/documents/${documentId}`,
+      data
+    );
+    return response.data.data!;
+  }
+
   async deleteDocument(documentId: string): Promise<void> {
     await this.client.delete(`/documents/${documentId}`);
   }

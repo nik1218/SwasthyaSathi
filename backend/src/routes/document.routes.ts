@@ -3,7 +3,7 @@ import multer from 'multer';
 import { body, validationResult } from 'express-validator';
 import { AuthRequest, authenticateToken } from '../middleware/auth';
 import { DocumentService } from '../services/document.service';
-import { ErrorCode, DocumentType } from '@swasthyasathi/shared';
+import { ErrorCode, DocumentType, UpdateDocumentRequest } from '@swasthyasathi/shared';
 import config from '../config';
 import logger from '../utils/logger';
 
@@ -139,6 +139,62 @@ router.get(
       return res.status(200).json(result);
     } catch (error) {
       logger.error('Get document endpoint error:', error);
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: ErrorCode.SERVER_ERROR,
+          message: 'Internal server error',
+        },
+      });
+    }
+  }
+);
+
+// Update document endpoint
+router.put(
+  '/:id',
+  authenticateToken,
+  [
+    body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
+    body('description').optional().trim(),
+    body('notes').optional().trim(),
+    body('type').optional().isIn(Object.values(DocumentType)),
+  ],
+  async (req: AuthRequest, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: ErrorCode.VALIDATION_ERROR,
+          message: 'Validation failed',
+          details: errors.array(),
+        },
+      });
+    }
+
+    try {
+      const updateData: UpdateDocumentRequest = {
+        title: req.body.title,
+        description: req.body.description,
+        notes: req.body.notes,
+        type: req.body.type,
+      };
+
+      const result = await documentService.updateDocument(
+        req.params.id,
+        req.userId!,
+        updateData
+      );
+
+      if (!result.success) {
+        const statusCode = result.error?.code === ErrorCode.NOT_FOUND ? 404 : 500;
+        return res.status(statusCode).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      logger.error('Update document endpoint error:', error);
       return res.status(500).json({
         success: false,
         error: {

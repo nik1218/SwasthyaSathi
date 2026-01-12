@@ -71,6 +71,7 @@ export interface Document {
   type: DocumentType;
   title?: string;
   description?: string;
+  notes?: string; // User-added notes or annotations
   fileUrl: string;
   thumbnailUrl?: string; // 300x400px thumbnail
   fileSize: number; // in bytes
@@ -92,6 +93,13 @@ export interface UploadDocumentRequest {
   description?: string;
   processWithAI?: boolean;
   processWithOCR?: boolean;
+}
+
+export interface UpdateDocumentRequest {
+  title?: string;
+  description?: string;
+  notes?: string;
+  type?: DocumentType;
 }
 
 // API Response Types

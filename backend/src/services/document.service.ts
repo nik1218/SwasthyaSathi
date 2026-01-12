@@ -7,6 +7,7 @@ import {
   DocumentType,
   DocumentStatus,
   UploadDocumentRequest,
+  UpdateDocumentRequest,
   ApiResponse,
   ErrorCode,
 } from '@swasthyasathi/shared';
@@ -209,6 +210,93 @@ export class DocumentService {
         error: {
           code: ErrorCode.SERVER_ERROR,
           message: 'Failed to retrieve document',
+        },
+      };
+    }
+  }
+
+  async updateDocument(
+    documentId: string,
+    userId: string,
+    updateData: UpdateDocumentRequest
+  ): Promise<ApiResponse<Document>> {
+    try {
+      // Check if document exists and belongs to user
+      const checkResult = await pool.query(
+        'SELECT id FROM documents WHERE id = $1 AND user_id = $2',
+        [documentId, userId]
+      );
+
+      if (checkResult.rows.length === 0) {
+        return {
+          success: false,
+          error: {
+            code: ErrorCode.NOT_FOUND,
+            message: 'Document not found',
+          },
+        };
+      }
+
+      // Build dynamic UPDATE query
+      const updates: string[] = [];
+      const values: any[] = [];
+      let paramCounter = 1;
+
+      if (updateData.title !== undefined) {
+        updates.push(`title = $${paramCounter}`);
+        values.push(updateData.title);
+        paramCounter++;
+      }
+
+      if (updateData.description !== undefined) {
+        updates.push(`description = $${paramCounter}`);
+        values.push(updateData.description);
+        paramCounter++;
+      }
+
+      if (updateData.notes !== undefined) {
+        updates.push(`notes = $${paramCounter}`);
+        values.push(updateData.notes);
+        paramCounter++;
+      }
+
+      if (updateData.type !== undefined) {
+        updates.push(`type = $${paramCounter}`);
+        values.push(updateData.type);
+        paramCounter++;
+      }
+
+      // If no fields to update, return current document
+      if (updates.length === 0) {
+        return this.getDocument(documentId, userId);
+      }
+
+      // Add document ID to values
+      values.push(documentId);
+      values.push(userId);
+
+      const query = `
+        UPDATE documents
+        SET ${updates.join(', ')}
+        WHERE id = $${paramCounter} AND user_id = $${paramCounter + 1}
+        RETURNING *
+      `;
+
+      const result = await pool.query(query, values);
+
+      // Get full document with AI analysis
+      const updatedDocument = await this.getDocument(documentId, userId);
+
+      logger.info(`Document updated: ${documentId} for user ${userId}`);
+
+      return updatedDocument;
+    } catch (error) {
+      logger.error('Update document error:', error);
+      return {
+        success: false,
+        error: {
+          code: ErrorCode.SERVER_ERROR,
+          message: 'Failed to update document',
         },
       };
     }
@@ -543,6 +631,7 @@ Please format your response as JSON with these fields: extractedText, summary, i
       type: dbDoc.type as DocumentType,
       title: dbDoc.title,
       description: dbDoc.description,
+      notes: dbDoc.notes,
       fileUrl: dbDoc.file_url,
       thumbnailUrl: dbDoc.thumbnail_url,
       fileSize: parseInt(dbDoc.file_size),
